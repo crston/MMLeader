@@ -1,0 +1,12 @@
+name: MMLeader
+main: com.gmail.bobason01.MMLeader
+version: 1.1.0
+api-version: 1.16
+author: crston
+description: MythicMobs kill order statistics with PlaceholderAPI
+depend:
+  - MythicMobs
+  - PlaceholderAPI
+softdepend:
+  - Parties
+  - LuckPerms

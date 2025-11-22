@@ -1,26 +1,22 @@
-# Database
-
 database:
-  # mysql sqlite yaml
-  type: yaml
-
+  type: yaml # mysql, sqlite, yaml
   mysql:
     host: localhost
     port: 3306
     database: mmleader
     user: root
     password: password
-    pool-size: 10
+    pool-size: 5
 
-# Whitelist
-
-whitelist:
-  enabled: true
-  mobs:
-    - example_boss
-
-# Party System
+options:
+  max-kills-per-mob: 100
+  async-threads: 1
 
 party:
-  # auto none parties mmocore mythicdungeons
-  provider: auto
+  provider: auto # auto, none, parties, mmocore, mythicdungeons
+
+whitelist:
+  enabled: false
+  mobs:
+    - example_mob_1
+    - example_mob_2

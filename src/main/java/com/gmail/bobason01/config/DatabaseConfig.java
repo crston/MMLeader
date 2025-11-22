@@ -2,6 +2,7 @@ package com.gmail.bobason01.config;
 
 public final class DatabaseConfig {
 
+    private final String type;
     private final String host;
     private final int port;
     private final String database;
@@ -10,12 +11,17 @@ public final class DatabaseConfig {
     private final int poolSize;
 
     public DatabaseConfig(PluginConfig config) {
+        this.type = config.getString("database.type", "sqlite");
         this.host = config.getString("database.mysql.host", "localhost");
         this.port = config.getInt("database.mysql.port", 3306);
         this.database = config.getString("database.mysql.database", "mmleader");
         this.user = config.getString("database.mysql.user", "root");
         this.password = config.getString("database.mysql.password", "password");
         this.poolSize = config.getInt("database.mysql.pool-size", 5);
+    }
+
+    public String getType() {
+        return type == null ? "sqlite" : type.toLowerCase();
     }
 
     public String getHost() {

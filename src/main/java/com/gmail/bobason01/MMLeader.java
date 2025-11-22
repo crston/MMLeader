@@ -1,11 +1,15 @@
 package com.gmail.bobason01;
 
+import com.alessiodp.parties.api.Parties;
+import com.alessiodp.parties.api.interfaces.PartiesAPI;
 import com.gmail.bobason01.config.DatabaseConfig;
 import com.gmail.bobason01.config.PluginConfig;
 import com.gmail.bobason01.config.WhitelistConfig;
-import com.gmail.bobason01.database.MySQLDatabase;
-import com.gmail.bobason01.database.SQLiteDatabase;
-import com.gmail.bobason01.database.YamlDatabase;
+import com.gmail.bobason01.core.KillHistoryManager;
+import com.gmail.bobason01.database.DatabaseBackend;
+import com.gmail.bobason01.database.MySQLBackend;
+import com.gmail.bobason01.database.SQLiteBackend;
+import com.gmail.bobason01.database.YamlBackend;
 import com.gmail.bobason01.listener.KillListener;
 import com.gmail.bobason01.party.IPartyProvider;
 import com.gmail.bobason01.party.PartyProviderSelector;
@@ -21,7 +25,8 @@ public final class MMLeader extends JavaPlugin {
     private DatabaseConfig databaseConfig;
     private WhitelistConfig whitelistConfig;
 
-    private DatabaseManager databaseManager;
+    private DatabaseBackend backend;
+    private KillHistoryManager historyManager;
     private IPartyProvider partyProvider;
     private PlayerInfoProvider playerInfoProvider;
     private WhitelistManager whitelistManager;
@@ -36,67 +41,71 @@ public final class MMLeader extends JavaPlugin {
         this.whitelistConfig = new WhitelistConfig(pluginConfig);
 
         this.whitelistManager = new WhitelistManager(whitelistConfig);
-        loadDatabase();
+
+        this.backend = createBackend(databaseConfig);
+        if (backend != null) {
+            backend.init();
+        }
+
+        int maxPerMob = pluginConfig.getInt("options.max-kills-per-mob", 100);
+        int asyncThreads = pluginConfig.getInt("options.async-threads", 1);
+        this.historyManager = new KillHistoryManager(backend, maxPerMob, asyncThreads);
 
         this.partyProvider = PartyProviderSelector.select(pluginConfig);
         this.playerInfoProvider = new PlayerInfoProvider();
 
         Bukkit.getPluginManager().registerEvents(
-                new KillListener(databaseManager, partyProvider, whitelistManager),
+                new KillListener(historyManager, partyProvider, whitelistManager),
                 this
         );
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new PlaceholderHook(
                     this,
-                    databaseManager,
-                    partyProvider,
+                    historyManager,
                     playerInfoProvider
             ).register();
         }
 
-        getLogger().info("MMLeader enabled");
+        getLogger().info("MMLeader 2.0 enabled");
     }
 
     @Override
     public void onDisable() {
-        if (databaseManager != null) {
-            databaseManager.close();
+        try {
+            if (historyManager != null) {
+                historyManager.shutdown();
+            }
+        } catch (Throwable ignored) {
         }
+        try {
+            if (backend != null) {
+                backend.close();
+            }
+        } catch (Throwable ignored) {
+        }
+        getLogger().info("MMLeader disabled");
     }
 
-    private void loadDatabase() {
-        String type = pluginConfig.getString("database.type", "sqlite");
-        if (type == null) {
-            type = "sqlite";
-        }
-        type = type.toLowerCase();
-
-        DatabaseManager coreDatabase;
-
+    private DatabaseBackend createBackend(DatabaseConfig cfg) {
+        String type = cfg.getType();
         switch (type) {
             case "mysql":
-                coreDatabase = new MySQLDatabase(this, databaseConfig);
-                break;
+                return new MySQLBackend(this, cfg);
             case "yaml":
-                coreDatabase = new YamlDatabase(this);
-                break;
+                return new YamlBackend(this);
             case "sqlite":
             default:
-                coreDatabase = new SQLiteDatabase(this);
-                break;
+                return new SQLiteBackend(this);
         }
-
-        databaseManager = new AsyncDatabaseManager(coreDatabase);
-        databaseManager.init();
     }
 
     public static MMLeader getInstance() {
         return instance;
     }
 
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
+    public KillHistoryManager getHistoryManager() {
+        return historyManager;
     }
 
     public IPartyProvider getPartyProvider() {
@@ -109,5 +118,15 @@ public final class MMLeader extends JavaPlugin {
 
     public WhitelistManager getWhitelistManager() {
         return whitelistManager;
+    }
+
+    public PartiesAPI getPartiesApiIfPresent() {
+        try {
+            if (Bukkit.getPluginManager().isPluginEnabled("Parties")) {
+                return Parties.getApi();
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
     }
 }

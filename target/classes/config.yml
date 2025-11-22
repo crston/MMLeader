@@ -1,21 +1,26 @@
+# Database
+
 database:
-  type: sqlite
+  # mysql sqlite yaml
+  type: yaml
+
   mysql:
     host: localhost
     port: 3306
     database: mmleader
     user: root
     password: password
+    pool-size: 10
 
-options:
-  sort-mode: asc
-  debug: false
-
-party:
-  provider: auto
-  # auto, parties, mmocore, mythicdungeons, none
+# Whitelist
 
 whitelist:
   enabled: true
   mobs:
-    - zombie_king
+    - example_boss
+
+# Party System
+
+party:
+  # auto none parties mmocore mythicdungeons
+  provider: auto

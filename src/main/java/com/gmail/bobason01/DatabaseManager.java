@@ -1,5 +1,7 @@
 package com.gmail.bobason01;
 
+import com.gmail.bobason01.kill.KillRecord;
+
 import java.util.List;
 
 public interface DatabaseManager {

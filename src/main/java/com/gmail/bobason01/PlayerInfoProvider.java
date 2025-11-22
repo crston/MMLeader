@@ -3,7 +3,7 @@ package com.gmail.bobason01;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
-public class PlayerInfoProvider {
+public final class PlayerInfoProvider {
 
     public String getLuckPermsPrefix(String name) {
         try {

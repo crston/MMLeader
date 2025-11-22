@@ -1,10 +1,12 @@
 package com.gmail.bobason01;
 
+import com.gmail.bobason01.kill.KillRecord;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class AsyncDatabaseManager implements DatabaseManager {
+public final class AsyncDatabaseManager implements DatabaseManager {
 
     private final DatabaseManager delegate;
     private ExecutorService executorService;
@@ -34,11 +36,12 @@ public class AsyncDatabaseManager implements DatabaseManager {
 
     @Override
     public void recordKill(String mobId, List<String> partyMembers, String partyLeader) {
-        if (executorService == null || executorService.isShutdown()) {
+        ExecutorService exec = executorService;
+        if (exec == null || exec.isShutdown()) {
             delegate.recordKill(mobId, partyMembers, partyLeader);
             return;
         }
-        executorService.submit(() -> delegate.recordKill(mobId, partyMembers, partyLeader));
+        exec.submit(() -> delegate.recordKill(mobId, partyMembers, partyLeader));
     }
 
     @Override

@@ -3,6 +3,9 @@
     <output-path>$PROJECT_DIR$/out/artifacts/MMLeader_jar</output-path>
     <root id="archive" name="MMLeader.jar">
       <element id="module-output" name="MMLeader" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/xerial/sqlite-jdbc/3.45.1.0/sqlite-jdbc-3.45.1.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
